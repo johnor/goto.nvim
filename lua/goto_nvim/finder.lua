@@ -119,6 +119,10 @@ function M.counterpart(path, mappings, kind)
    end
 
    local stem = vim.fn.fnamemodify(path, ":t:r")
+   if current and current.prefix and vim.startswith(stem, current.prefix) then
+      stem = stem:sub(#current.prefix + 1)
+   end
+
    local file = M.find_file(path, target, stem)
    if not file then
       return nil, "Could not find a file to switch to"
