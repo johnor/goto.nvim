@@ -42,6 +42,19 @@ local function join(...)
    return vim.fs.joinpath(unpack(items))
 end
 
+local function sub_candidates(parent)
+   local parts = split_path(parent.sub)
+   local result = {}
+   for i = 1, #parts + 1 do
+      result[#result + 1] = table.concat(parts, "/", i)
+   end
+   local name = vim.fs.basename(parent.dir)
+   if name ~= "" then
+      result[#result + 1] = join(name, parent.sub)
+   end
+   return result
+end
+
 --- Find the file named "stem" (plus the mapping prefix and one of its
 --- endings) in the mapping directories, searching from the file's own
 --- directory and upwards.
@@ -58,10 +71,12 @@ function M.find_file(path, mapping, stem)
       for _, folder in ipairs(folders) do
          local base = join(parent.dir, folder)
          if is_dir(base) then
-            for _, ending in ipairs(mapping.endings or {}) do
-               local candidate = join(base, parent.sub, prefix .. stem .. "." .. ending)
-               if is_file(candidate) then
-                  return candidate
+            for _, sub in ipairs(sub_candidates(parent)) do
+               for _, ending in ipairs(mapping.endings or {}) do
+                  local candidate = join(base, sub, prefix .. stem .. "." .. ending)
+                  if is_file(candidate) then
+                     return candidate
+                  end
                end
             end
          end
