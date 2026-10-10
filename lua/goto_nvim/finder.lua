@@ -42,6 +42,20 @@ local function join(...)
    return vim.fs.joinpath(unpack(items))
 end
 
+local function prefixes(mapping)
+   local prefix = mapping.prefix
+   if type(prefix) == "string" then
+      return { prefix }
+   end
+   return prefix or {}
+end
+
+local function matching_prefix(name, mapping)
+   return vim.iter(prefixes(mapping)):find(function(prefix)
+      return vim.startswith(name, prefix)
+   end)
+end
+
 local function sub_candidates(parent)
    local parts = split_path(parent.sub)
    local result = {}
@@ -65,17 +79,19 @@ end
 function M.find_file(path, mapping, stem)
    local folders = { "." }
    vim.list_extend(folders, mapping.dirs or {})
-   local prefix = mapping.prefix or ""
+   local file_prefixes = #prefixes(mapping) > 0 and prefixes(mapping) or { "" }
 
    for _, parent in ipairs(M.iterate_parents(path)) do
       for _, folder in ipairs(folders) do
          local base = join(parent.dir, folder)
          if is_dir(base) then
             for _, sub in ipairs(sub_candidates(parent)) do
-               for _, ending in ipairs(mapping.endings or {}) do
-                  local candidate = join(base, sub, prefix .. stem .. "." .. ending)
-                  if is_file(candidate) then
-                     return candidate
+               for _, prefix in ipairs(file_prefixes) do
+                  for _, ending in ipairs(mapping.endings or {}) do
+                     local candidate = join(base, sub, prefix .. stem .. "." .. ending)
+                     if is_file(candidate) then
+                        return candidate
+                     end
                   end
                end
             end
@@ -100,8 +116,8 @@ function M.current_mapping(path, mappings)
       local mapping = mappings[name]
       if ext and vim.tbl_contains(mapping.endings or {}, ext) then
          local score = 1
-         if mapping.prefix then
-            score = score + (vim.startswith(filename, mapping.prefix) and 1 or -1)
+         if #prefixes(mapping) > 0 then
+            score = score + (matching_prefix(filename, mapping) and 1 or -1)
          end
          if best_score == nil or score > best_score or (score == best_score and name < best_name) then
             best_name, best_score = name, score
@@ -133,8 +149,9 @@ function M.counterpart(path, mappings, kind)
    end
 
    local stem = vim.fn.fnamemodify(path, ":t:r")
-   if current and current.prefix and vim.startswith(stem, current.prefix) then
-      stem = stem:sub(#current.prefix + 1)
+   local prefix = current and matching_prefix(stem, current)
+   if prefix then
+      stem = stem:sub(#prefix + 1)
    end
 
    local file = M.find_file(path, target, stem)

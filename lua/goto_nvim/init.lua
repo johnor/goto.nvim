@@ -5,7 +5,7 @@ local M = {}
 ---@class GotoMapping
 ---@field dirs string[] directories to search, besides the file's own directory
 ---@field endings string[] file extensions, without the dot
----@field prefix string|nil file name prefix, e.g. "Test"
+---@field prefix string|string[]|nil file name prefix(es), e.g. "Test"
 ---@field switch string|nil mapping to jump to from files of this kind
 
 M.defaults = {
@@ -23,7 +23,7 @@ M.defaults = {
       test = {
          dirs = { "UnitTest", "UnitTests", "test", "UnitTest/Source", "test/src", "UnitTests/Source" },
          endings = { "cpp", "c" },
-         prefix = "Test",
+         prefix = { "Test", "test_" },
          switch = "source",
       },
    },
