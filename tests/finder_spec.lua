@@ -53,6 +53,32 @@ describe("finder", function()
       assert.equals("source", (finder.current_mapping(root .. "/Source/foo.cpp", defaults)))
    end)
 
+   describe("with a namespace directory below include", function()
+      local lib
+
+      before_each(function()
+         lib = helpers.make_tree({
+            "lib/include/lib/file.h",
+            "lib/src/file.cpp",
+            "lib/test/src/test_file.cpp",
+         }) .. "/lib"
+      end)
+
+      it("finds the source", function()
+         assert.equals(lib .. "/src/file.cpp", finder.counterpart(lib .. "/include/lib/file.h", defaults))
+      end)
+
+      it("finds the header", function()
+         assert.equals(lib .. "/include/lib/file.h", finder.counterpart(lib .. "/src/file.cpp", defaults))
+      end)
+
+      it("finds the test with a custom prefix", function()
+         local mapping = vim.deepcopy(defaults)
+         mapping.test.prefix = "test_"
+         assert.equals(lib .. "/test/src/test_file.cpp", finder.counterpart(lib .. "/include/lib/file.h", mapping, "test"))
+      end)
+   end)
+
    it("reports unknown file types and missing files", function()
       local file, err = finder.counterpart(root .. "/README.md", defaults)
       assert.is_nil(file)
