@@ -38,6 +38,10 @@ describe("finder", function()
       assert.equals(root .. "/UnitTest/Testfile1.cpp", finder.counterpart(root .. "/Include/file1.h", defaults, "test"))
    end)
 
+   it("switches from a test to the source without the prefix", function()
+      assert.equals(root .. "/Source/file1.cpp", finder.counterpart(root .. "/UnitTest/Testfile1.cpp", defaults))
+   end)
+
    it("picks the test mapping for prefixed files", function()
       assert.equals("source", (finder.current_mapping(root .. "/Source/file1.cpp", defaults)))
       assert.equals("test", (finder.current_mapping(root .. "/UnitTest/Testfile1.cpp", defaults)))
