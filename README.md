@@ -50,12 +50,15 @@ require("goto_nvim").setup({
       test = {
          dirs = { "UnitTest", "UnitTests", "test", "UnitTest/Source", "test/src", "UnitTests/Source" },
          endings = { "cpp", "c" },
-         prefix = "Test",
+         prefix = { "Test", "test_" },
          switch = "source",
       },
    },
 })
 ```
+
+"prefix" is a string or a list of strings. A list matches any of them when
+recognizing a test file and is searched in order when looking for one.
 
 Lists replace the default list, they are not merged.
 Only the keys you give are overridden, e.g. `mapping = { test = { dirs = { "tests" } } }`.

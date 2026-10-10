@@ -72,10 +72,44 @@ describe("finder", function()
          assert.equals(lib .. "/include/lib/file.h", finder.counterpart(lib .. "/src/file.cpp", defaults))
       end)
 
-      it("finds the test with a custom prefix", function()
+      it("finds the test with the default test_ prefix", function()
+         assert.equals(
+            lib .. "/test/src/test_file.cpp",
+            finder.counterpart(lib .. "/include/lib/file.h", defaults, "test")
+         )
+      end)
+
+      it("switches from a test_ file to the source", function()
+         assert.equals(lib .. "/src/file.cpp", finder.counterpart(lib .. "/test/src/test_file.cpp", defaults))
+      end)
+
+      it("accepts a single string as prefix", function()
          local mapping = vim.deepcopy(defaults)
          mapping.test.prefix = "test_"
-         assert.equals(lib .. "/test/src/test_file.cpp", finder.counterpart(lib .. "/include/lib/file.h", mapping, "test"))
+         assert.equals(
+            lib .. "/test/src/test_file.cpp",
+            finder.counterpart(lib .. "/include/lib/file.h", mapping, "test")
+         )
+      end)
+
+      it("finds the first prefix if several matches", function()
+         local both = helpers.make_tree({
+            "include/lib/file.h",
+            "test/src/Testfile.cpp",
+            "test/src/test_file.cpp",
+         })
+         local mapping = vim.deepcopy(defaults)
+         mapping.test.prefix = { "Test", "test_" }
+         assert.equals(
+            both .. "/test/src/Testfile.cpp",
+            finder.counterpart(both .. "/include/lib/file.h", mapping, "test")
+         )
+
+         mapping.test.prefix = { "test_", "Test" }
+         assert.equals(
+            both .. "/test/src/test_file.cpp",
+            finder.counterpart(both .. "/include/lib/file.h", mapping, "test")
+         )
       end)
    end)
 
