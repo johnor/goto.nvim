@@ -79,12 +79,11 @@ end
 ---@return table|nil mapping
 function M.current_mapping(path, mappings)
    local filename = vim.fs.basename(path)
+   local ext = filename:match("%.([^.]+)$")
    local best_name, best_score
    for _, name in ipairs(vim.tbl_keys(mappings)) do
       local mapping = mappings[name]
-      if vim.iter(mapping.endings or {}):any(function(ending)
-         return vim.endswith(filename, ending)
-      end) then
+      if ext and vim.tbl_contains(mapping.endings or {}, ext) then
          local score = 1
          if mapping.prefix then
             score = score + (vim.startswith(filename, mapping.prefix) and 1 or -1)
