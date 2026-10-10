@@ -48,6 +48,11 @@ describe("finder", function()
       assert.equals("header", (finder.current_mapping(root .. "/Include/file1.h", defaults)))
    end)
 
+   it("matches endings on the extension", function()
+      assert.is_nil(select(2, finder.current_mapping(root .. "/Source/foocpp", defaults)))
+      assert.equals("source", (finder.current_mapping(root .. "/Source/foo.cpp", defaults)))
+   end)
+
    it("reports unknown file types and missing files", function()
       local file, err = finder.counterpart(root .. "/README.md", defaults)
       assert.is_nil(file)
