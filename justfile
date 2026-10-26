@@ -1,13 +1,12 @@
-plenary := ".deps/plenary.nvim"
+mini_test := ".deps/mini.test"
 
 default: test
 
 deps:
-    [ -d {{plenary}} ] || git clone --depth 1 https://github.com/nvim-lua/plenary.nvim {{plenary}}
+    [ -d {{mini_test}} ] || git clone --depth 1 https://github.com/echasnovski/mini.test {{mini_test}}
 
 test: deps
-    nvim --headless -u tests/minimal_init.lua \
-        -c "PlenaryBustedDirectory tests {minimal_init = 'tests/minimal_init.lua', sequential = true}"
+    nvim --headless -u tests/minimal_init.lua -c "lua MiniTest.run({ execute = { reporter = require(\"tests.reporter\").verbose() } })"
 
 clean:
     rm -rf .deps
