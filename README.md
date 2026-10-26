@@ -62,7 +62,7 @@ Only the keys you give are overridden, e.g. `mapping = { test = { dirs = { "test
 
 ## Tests
 
-Needs [plenary.nvim](https://github.com/nvim-lua/plenary.nvim)
-(`PLENARY_DIR` overrides the default lazy.nvim location).
+Needs [mini.test](https://github.com/echasnovski/mini.test)
+(`MINI_TEST_DIR` overrides the default `.deps/mini.test`).
 
     just test
